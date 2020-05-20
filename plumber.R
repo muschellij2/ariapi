@@ -13,15 +13,100 @@ library(ariExtra)
 library(didactr)
 library(rmarkdown)
 
-file = system.file("extdata", "example.pdf", package = "ariExtra")
-script = c("hey", "ho")
 
-#* @apiTitle Presentation Video GenerationAPI
+
+#' @examples 
+#' library(httr)
+#' file = system.file("extdata", "example.pdf", package = "ariExtra")
+#' tfile = tempfile()
+#' script = c("hey", "ho")
+#' writeLines(script, tfile)
+#' 
+#' api_url = "http://127.0.0.1:3055"
+#' POST(paste0(api_url, "/pdf_to_video"),
+#'    body = list(file = upload_file(file), script = upload_file(tfile)))
+name_contents = function(req) {
+  contents = mime::parse_multipart(req)
+  arg_names = c("file", "script", "voice",
+                "service")
+  contents_names = names(contents)
+  print(arg_names)
+  named_contents = contents[contents_names %in% arg_names ]
+  contents = contents[!names(contents) %in% arg_names]
+  n_contents = seq_along(contents)
+  print(contents)
+  names(contents) = setdiff(arg_names, contents_names)[n_contents]
+  contents = c(named_contents, contents)
+  
+  voice = contents$voice
+  service = contents$service
+  if (is.null(service)) {
+    service = "amazon"
+  }
+  if (is.null(voice)) {
+    voice = text2speech::tts_default_voice(service = service)
+  }
+  contents$voice = voice
+  contents$service = service
+  
+  return(contents)
+}
+
+guess_ari_func = function(contents) {
+  file = contents$file
+  if (!is.data.frame(file)) {
+    func_name = "ariExtra::gs_to_ari"
+  } else {
+    type = file$type
+    btype = tolower(basename(type))
+    if (btype %in% "pdf") {
+      func_name = "ariExtra::pdf_to_ari"
+    }
+    if (btype %in% "png") {
+      func_name = "ariExtra::pngs_to_ari"
+    }
+    if (any(grepl("officedocument.presentation", btype))) {
+      func_name = "ariExtra::pptx_to_ari"
+    }
+    # func_name = "mp4_to_ari"
+    
+    # func_name = "rmd_to_ari"
+    # func_name = "mp4_to_ari"
+  }
+  
+  # use do.call
+  return(func_name)
+
+}
+
+#* @apiTitle Presentation Video Generation API
 
 #* Echo back the input
-#* @param msg The message to echo
-#* @put /pdf_to_video
-function(file, script, voice = NULL) {
+#* @param file file upload of PDF slides
+#* @param script file upload of script
+#* @serializer contentType list(type="video/mp4")
+#* @post /pdf_to_video
+function(req) {
+
+  contents = name_contents(req)
+  func_to_run = guess_ari_func(contents)
+  file = contents$file
+  print(file)
+  script = contents$script
+  print(script)
+  voice = contents$voice
+  service = contents$service
+  
+  file = file$datapath
+  script = script$datapath
+  
+  cat(file)
+  cat(script)
+  # args = list(file = file, script = script)
+  # args$service = service
+  # args$voice = voice
+  # args$open = FALSE
+  # do.call(func_to_run, args = args)
   res = pdf_to_ari(file, script = script, 
                    open = FALSE)
   doc_args = list(verbose = TRUE)
@@ -33,21 +118,6 @@ function(file, script, voice = NULL) {
   if (!file.exists(output)) {
     stop("Video was not generated") 
   }
-  return()
+  readBin(output, "raw", n = file.info(output)$size)
 }
 
-#* Plot a histogram
-#* @png
-#* @get /plot
-function() {
-    rand <- rnorm(100)
-    hist(rand)
-}
-
-#* Return the sum of two numbers
-#* @param a The first number to add
-#* @param b The second number to add
-#* @post /sum
-function(a, b) {
-    as.numeric(a) + as.numeric(b)
-}
