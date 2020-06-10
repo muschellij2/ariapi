@@ -59,7 +59,7 @@ output = open_video(res)
 file = system.file("extdata", "example.pptx", package = "ariExtra")
 
 body = list(
-  file = upload_file(file),
+  file = upload_file(file)
 )
 res = httr::POST(
   url = api_url, 
