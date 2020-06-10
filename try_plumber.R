@@ -1,9 +1,9 @@
 library(httr)
 library(ariExtra)
-url = "http://127.0.0.1"
-port = 4710
-api_url = paste0(url, ":", port)
-# api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
+# url = "http://127.0.0.1"
+# port = 4710
+# api_url = paste0(url, ":", port)
+api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
 api_url = paste0(api_url, "/to_ari")
 
 api_key = Sys.getenv("CONNECT_API_KEY")
@@ -47,6 +47,21 @@ writeLines(c("hey", "ho"), script)
 body = list(
   # file = upload_file
   file = upload_file(pdf_file),
+  script = upload_file(script)
+)
+res = httr::POST(
+  url = api_url, 
+  body = body, 
+  auth_hdr)
+output = open_video(res)
+
+
+# does not work - can't do multiple files - maybe base64 encode?
+file = system.file("extdata", c("example_1.png", "example_2.png"),
+                     package = "ariExtra")
+body = list(
+  # file = upload_file
+  file = lapply(file, upload_file),
   script = upload_file(script)
 )
 res = httr::POST(

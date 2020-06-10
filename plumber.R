@@ -13,6 +13,7 @@ library(ariExtra)
 library(didactr)
 library(rmarkdown)
 library(animation) #need for ffmpeg
+library(base64enc)
 Sys.setenv(GL_AUTH = "google_authorization.json")
 
 
@@ -159,7 +160,7 @@ ari_processor = function(res, voice, service) {
   doc_args = list(verbose = TRUE)
   doc_args$voice = voice
   doc_args$service = service
-  format = do.call(ari_document, args = doc_args)
+  format = do.call(ariExtra::ari_document, args = doc_args)
   
   out = rmarkdown::render(res$output_file, output_format = format)
   output = output_movie_file
