@@ -28,6 +28,8 @@ library(animation) #need for ffmpeg
 #' POST(paste0(api_url, "/pdf_to_video"),
 #'    body = list(file = upload_file(file), script = upload_file(tfile)))
 name_contents = function(req) {
+  # print("req is this!")
+  # print(req)
   contents = mime::parse_multipart(req)
   arg_names = c("file", "script", "voice",
                 "service")
@@ -54,21 +56,39 @@ name_contents = function(req) {
   return(contents)
 }
 
-guess_ari_func = function(contents) {
+guess_ari_func = function(contents, verbose = TRUE) {
   file = contents$file
   if (!is.data.frame(file)) {
-    func_name = "ariExtra::gs_to_ari"
+    if (verbose) {
+      print("gs")
+    }
+    func_name = ariExtra::gs_to_ari
+    attr(func_name, "type") = "gs"
+    
   } else {
     type = file$type
     btype = tolower(basename(type))
     if (btype %in% "pdf") {
-      func_name = "ariExtra::pdf_to_ari"
+      if (verbose) {
+        print("pdf")
+      }      
+      func_name = ariExtra::pdf_to_ari
+      attr(func_name, "type") = "png"
+      
     }
     if (btype %in% "png") {
-      func_name = "ariExtra::pngs_to_ari"
+      if (verbose) {
+        print("png")
+      }      
+      func_name = ariExtra::pngs_to_ari
+      attr(func_name, "type") = "png"
     }
     if (any(grepl("officedocument.presentation", btype))) {
-      func_name = "ariExtra::pptx_to_ari"
+      if (verbose) {
+        print("pptx")
+      }      
+      func_name = ariExtra::pptx_to_ari
+      attr(func_name, "type") = "pptx"
     }
     # func_name = "mp4_to_ari"
     
@@ -78,40 +98,54 @@ guess_ari_func = function(contents) {
   
   # use do.call
   return(func_name)
-
+  
 }
 
 #* @apiTitle Presentation Video Generation API
 
 #* Echo back the input
-#* @param file file upload of PDF slides
+#* @param file file upload of PDF slides, PPTX file, or list of PNGs
 #* @param script file upload of script
 #* @serializer contentType list(type="video/mp4")
-#* @post /pdf_to_video
+#* @post /to_ari
 function(req) {
   
   # stop("Not ready")
   contents = name_contents(req)
-  func_to_run = guess_ari_func(contents)
+  print("contents")
+  print(contents)
+  func_to_run = guess_ari_func(contents, verbose = TRUE)
+  type_out = attr(func_to_run, "type")
+  attr(func_to_run, "type") = NULL
+  print("func_to_run")
+  # print(func_to_run)
   file = contents$file
+  print("file")
   print(file)
   script = contents$script
   print(script)
   voice = contents$voice
   service = contents$service
   
-  file = file$datapath
+  if (is.null(type_out) || !type_out %in% "gs") {
+    file = file$datapath
+  }
   script = script$datapath
   
   cat(file)
   cat(script)
-  # args = list(file = file, script = script)
-  # args$service = service
-  # args$voice = voice
-  # args$open = FALSE
-  # do.call(func_to_run, args = args)
-  res = pdf_to_ari(file, script = script, 
-                   open = FALSE)
+  args = list(path = file, script = script)
+  args$service = service
+  args$voice = voice
+  args$open = FALSE
+  res = do.call(func_to_run, args = args)
+  # res = func_to_run(file, script = script, 
+  #                   open = FALSE)
+  ari_processor(res, voice = voice)
+}
+
+
+ari_processor = function(res, voice) {
   doc_args = list(verbose = TRUE)
   doc_args$voice = voice
   format = do.call(ari_document, args = doc_args)
@@ -123,4 +157,3 @@ function(req) {
   }
   readBin(output, "raw", n = file.info(output)$size)
 }
-
