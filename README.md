@@ -8,5 +8,5 @@
 <!-- badges: end -->
 
 The goal of ario is to provide a plumber implementation of `ari`. The
-name is supposed to be like “mARIO” from Mario brothers (for the
+name is supposed to be like “mARIO” from Mario Brothers (for the
 plumbing\!).

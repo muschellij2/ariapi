@@ -12,6 +12,8 @@ library(ari)
 library(ariExtra)
 library(didactr)
 library(rmarkdown)
+library(animation) #need for ffmpeg
+
 
 
 
@@ -22,7 +24,7 @@ library(rmarkdown)
 #' script = c("hey", "ho")
 #' writeLines(script, tfile)
 #' 
-#' api_url = "http://127.0.0.1:3055"
+#' api_url = "http://127.0.0.1:4892"
 #' POST(paste0(api_url, "/pdf_to_video"),
 #'    body = list(file = upload_file(file), script = upload_file(tfile)))
 name_contents = function(req) {
@@ -87,7 +89,8 @@ guess_ari_func = function(contents) {
 #* @serializer contentType list(type="video/mp4")
 #* @post /pdf_to_video
 function(req) {
-
+  
+  # stop("Not ready")
   contents = name_contents(req)
   func_to_run = guess_ari_func(contents)
   file = contents$file
