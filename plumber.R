@@ -104,8 +104,8 @@ guess_ari_func = function(contents, verbose = TRUE) {
 #* @apiTitle Presentation Video Generation API
 
 #* Echo back the input
-#* @param file file upload of PDF slides, PPTX file, or list of PNGs
 #* @param script file upload of script
+#* @param file file upload of PDF slides, PPTX file, or list of PNGs
 #* @serializer contentType list(type="video/mp4")
 #* @post /to_ari
 function(req) {
