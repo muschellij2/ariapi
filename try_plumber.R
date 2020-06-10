@@ -6,12 +6,14 @@ library(ariExtra)
 api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
 api_url = paste0(api_url, "/to_ari")
 
-open_video = function(res) {
+open_video = function(res, open = TRUE) {
   httr::stop_for_status(res)
-  bin_data = content(res)
+  bin_data = httr::content(res)
   output = tempfile(fileext = ".mp4")
   writeBin(bin_data, output)
-  system2("open", output)
+  if (open) {
+    system2("open", output)
+  }
   output
 }
 # Google Slide ID
