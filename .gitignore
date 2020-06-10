@@ -4,3 +4,4 @@
 .Ruserdata
 googlesheets_token.rds
 *token*
+rsconnect/*

@@ -1,0 +1,52 @@
+Package: ario
+Type: Package
+Title: Ari O
+Version: 1.0.0
+Authors@R: c(person(given = "John",
+           family = "Muschelli",
+           email = "muschellij2@gmail.com",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6469-1750")))
+Maintainer: John Muschelli <muschellij2@gmail.com>
+Description: Ari Plumber
+Imports:
+    methods,
+    R.utils,
+    graphics,
+    grDevices,
+    stats, 
+    utils,
+    plumber,
+    didactr,
+    magick,
+    ari,
+    rmarkdown
+SystemRequirements: 
+    cmake,
+    libv8-dev,
+    libpng-dev,
+    libpoppler-cpp-dev,
+    libudunits2-dev,
+    libjq-dev,
+    libprotobuf-dev,
+    protobuf-compiler, 
+    libprotoc-dev, 
+    ImageMagick-c++-devel,
+    libmagick++-dev,
+    imagemagick,
+    libcurl4-openssl-dev,
+    libxml2-dev,
+    libfftw3-dev,
+    libgsl0-dev,
+    mesa-common-dev,
+    libglu1-mesa-dev,
+    devscripts,
+    libomp-dev,
+    libhdf5-serial-dev,
+    libhdf5-dev,
+    libgsl0ldbl,ffmpeg
+RoxygenNote: 7.0.2
+Encoding: UTF-8
+Remotes: muschellij2/ari,
+    muschellij2/didactr,
+    muschellij2/ariExtra
