@@ -26,7 +26,7 @@ Sys.setenv(GL_AUTH = "google_authorization.json")
 #' writeLines(script, tfile)
 #' 
 #' api_url = "http://127.0.0.1:4892"
-#' POST(paste0(api_url, "/pdf_to_video"),
+#' POST(paste0(api_url, "/to_video"),
 #'    body = list(file = upload_file(file), script = upload_file(tfile)))
 name_contents = function(req) {
   # print("req is this!")

@@ -55,18 +55,30 @@ res = httr::POST(
   auth_hdr)
 output = open_video(res)
 
+# Using PPTX - need libreoffice
+file = system.file("extdata", "example.pptx", package = "ariExtra")
 
-# does not work - can't do multiple files - maybe base64 encode?
-file = system.file("extdata", c("example_1.png", "example_2.png"),
-                     package = "ariExtra")
 body = list(
-  # file = upload_file
-  file = lapply(file, upload_file),
-  script = upload_file(script)
+  file = upload_file(file),
 )
 res = httr::POST(
   url = api_url, 
   body = body, 
   auth_hdr)
 output = open_video(res)
+
+
+# does not work - can't do multiple files - maybe base64 encode?
+# file = system.file("extdata", c("example_1.png", "example_2.png"),
+#                      package = "ariExtra")
+# body = list(
+#   # file = upload_file
+#   file = lapply(file, upload_file),
+#   script = upload_file(script)
+# )
+# res = httr::POST(
+#   url = api_url, 
+#   body = body, 
+#   auth_hdr)
+# output = open_video(res)
 
