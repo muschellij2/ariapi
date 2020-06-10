@@ -47,6 +47,9 @@ name_contents = function(req) {
   if (is.null(service)) {
     service = "amazon"
   }
+  if (!text2speech::tts_auth(service = service)) {
+    stop(paste0("Service ", service, " not authorized yet"))
+  }
   if (is.null(voice)) {
     voice = text2speech::tts_default_voice(service = service)
   }

@@ -6,6 +6,13 @@ library(ariExtra)
 api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
 api_url = paste0(api_url, "/to_ari")
 
+api_key = Sys.getenv("CONNECT_API_KEY")
+auth_hdr = NULL
+if (nzchar(api_key)) {
+  auth_hdr = httr::add_headers(
+    Authorization = paste0("Key ", api_key))
+}
+
 open_video = function(res, open = TRUE) {
   httr::stop_for_status(res)
   bin_data = httr::content(res)
@@ -25,7 +32,8 @@ body = list(
 )
 res = httr::POST(
   url = api_url, 
-  body = body)
+  body = body,
+  auth_hdr)
 output = open_video(res)
 
 
@@ -41,6 +49,7 @@ body = list(
 )
 res = httr::POST(
   url = api_url, 
-  body = body)
+  body = body, 
+  auth_hdr)
 output = open_video(res)
 
