@@ -13,7 +13,7 @@ library(ariExtra)
 library(didactr)
 library(rmarkdown)
 library(animation) #need for ffmpeg
-
+Sys.setenv(GL_AUTH = "google_authorization.json")
 
 
 
@@ -45,7 +45,8 @@ name_contents = function(req) {
   voice = contents$voice
   service = contents$service
   if (is.null(service)) {
-    service = "amazon"
+    # service = "amazon"
+    service = "google"
   }
   if (!text2speech::tts_auth(service = service)) {
     stop(paste0("Service ", service, " not authorized yet"))

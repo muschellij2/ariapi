@@ -5,3 +5,4 @@
 googlesheets_token.rds
 *token*
 rsconnect/*
+google_authorization.json
