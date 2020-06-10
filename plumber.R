@@ -134,6 +134,12 @@ function(req) {
   if (is.null(type_out) || !type_out %in% "gs") {
     file = file$datapath
   }
+  if (type_out %in% "pptx") {
+    # need this for docxtractr
+    tmpfile = file
+    file = paste0(tmpfile, ".pptx")
+    file.copy(tmpfile, file)
+  }
   script = script$datapath
   
   cat(file)
