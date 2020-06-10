@@ -110,7 +110,6 @@ guess_ari_func = function(contents, verbose = TRUE) {
 #* Echo back the input
 #* @param script file upload of script
 #* @param file file upload of PDF slides, PPTX file, or list of PNGs
-#* @serializer contentType list(type="video/mp4")
 #* @post /to_ari
 function(req) {
   
@@ -142,16 +141,24 @@ function(req) {
   args$service = service
   args$voice = voice
   args$open = FALSE
+  args$verbose = 2
+  print("args")
+  print(args)
   res = do.call(func_to_run, args = args)
   # res = func_to_run(file, script = script, 
   #                   open = FALSE)
-  ari_processor(res, voice = voice)
+  ##* @serializer contentType list(type="video/mp4")
+  list(
+    video = ari_processor(res, voice = voice, service = service),
+    result = TRUE
+  )
 }
 
 
-ari_processor = function(res, voice) {
+ari_processor = function(res, voice, service) {
   doc_args = list(verbose = TRUE)
   doc_args$voice = voice
+  doc_args$service = service
   format = do.call(ari_document, args = doc_args)
   
   out = rmarkdown::render(res$output_file, output_format = format)
@@ -159,5 +166,6 @@ ari_processor = function(res, voice) {
   if (!file.exists(output)) {
     stop("Video was not generated") 
   }
-  readBin(output, "raw", n = file.info(output)$size)
+  # readBin(output, "raw", n = file.info(output)$size)
+  base64enc::base64encode(output)
 }

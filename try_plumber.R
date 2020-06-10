@@ -1,9 +1,9 @@
 library(httr)
 library(ariExtra)
-# url = "http://127.0.0.1"
-# port = 5916
-# api_url = paste0(url, ":", port)
-api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
+url = "http://127.0.0.1"
+port = 4710
+api_url = paste0(url, ":", port)
+# api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
 api_url = paste0(api_url, "/to_ari")
 
 api_key = Sys.getenv("CONNECT_API_KEY")
@@ -16,6 +16,8 @@ if (nzchar(api_key)) {
 open_video = function(res, open = TRUE) {
   httr::stop_for_status(res)
   bin_data = httr::content(res)
+  bin_data = bin_data$video[[1]]
+  bin_data = base64enc::base64decode(bin_data)
   output = tempfile(fileext = ".mp4")
   writeBin(bin_data, output)
   if (open) {
