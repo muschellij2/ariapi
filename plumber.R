@@ -14,6 +14,7 @@ library(didactr)
 library(rmarkdown)
 library(animation) #need for ffmpeg
 library(base64enc)
+library(pagedown)
 Sys.setenv(GL_AUTH = "google_authorization.json")
 
 # way to get around "uploading" multiple files
@@ -118,13 +119,20 @@ guess_ari_func = function(contents, verbose = TRUE) {
       }      
       func_name = ariExtra::images_to_ari
       attr(func_name, "type") = "png"
-    }    
+    } 
+    if (all(btype %in% c("html"))) {
+      if (verbose) {
+        print("html")
+      }      
+      func_name = ariExtra::html_to_ari
+      attr(func_name, "type") = "html"
+    }     
     if (btype %in% "pdf") {
       if (verbose) {
         print("pdf")
       }      
       func_name = ariExtra::pdf_to_ari
-      attr(func_name, "type") = "png"
+      attr(func_name, "type") = "pdf"
       
     }
     if (any(grepl("officedocument.presentation", btype))) {
