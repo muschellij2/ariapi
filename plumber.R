@@ -16,6 +16,36 @@ library(animation) #need for ffmpeg
 library(base64enc)
 Sys.setenv(GL_AUTH = "google_authorization.json")
 
+# way to get around "uploading" multiple files
+# SHOULD REWRITE FOR ALL OF THIS
+convert_images = function(contents) {
+  file = contents$file
+  nc = 0
+  if (is.character(file)) {
+    nc = nchar(file)
+  }
+  if (!is.data.frame(file) & nc > 1000) {
+    file = strsplit(file, split = "\n")[[1]]
+    # getting the type
+    type = sub("^(.*): .*", "\\1", file)
+    file = sub("^(.*): (.*)", "\\2", file)
+    file = mapply(
+      function(x, ext) {
+        tfile = tempfile(fileext = paste0(".", ext))
+        out = base64enc::base64decode(x)
+        writeBin(out, con = tfile)
+        tfile
+      }, file, type)
+    file = unname(file)
+    file = data.frame(
+      datapath = file,
+      type = paste0("image/", type),
+      name = basename(file),
+      stringsAsFactors = FALSE)
+    contents$file = file
+  }
+  contents
+}
 
 
 #' @examples 
@@ -39,9 +69,17 @@ name_contents = function(req) {
   named_contents = contents[contents_names %in% arg_names ]
   contents = contents[!names(contents) %in% arg_names]
   n_contents = seq_along(contents)
-  print(contents)
+  
+
   names(contents) = setdiff(arg_names, contents_names)[n_contents]
   contents = c(named_contents, contents)
+  
+  # way to get around "uploading" multiple files
+  print("here are before content")
+  print(contents)
+  
+  contents = convert_images(contents)
+  print("here are the contents frm name_contents")  
   
   voice = contents$voice
   service = contents$service
@@ -58,6 +96,7 @@ name_contents = function(req) {
   contents$voice = voice
   contents$service = service
   
+  
   return(contents)
 }
 
@@ -73,6 +112,13 @@ guess_ari_func = function(contents, verbose = TRUE) {
   } else {
     type = file$type
     btype = tolower(basename(type))
+    if (all(btype %in% c("png", "jpg", "jpeg", "gif"))) {
+      if (verbose) {
+        print("png")
+      }      
+      func_name = ariExtra::images_to_ari
+      attr(func_name, "type") = "png"
+    }    
     if (btype %in% "pdf") {
       if (verbose) {
         print("pdf")
@@ -80,13 +126,6 @@ guess_ari_func = function(contents, verbose = TRUE) {
       func_name = ariExtra::pdf_to_ari
       attr(func_name, "type") = "png"
       
-    }
-    if (btype %in% "png") {
-      if (verbose) {
-        print("png")
-      }      
-      func_name = ariExtra::pngs_to_ari
-      attr(func_name, "type") = "png"
     }
     if (any(grepl("officedocument.presentation", btype))) {
       if (verbose) {
