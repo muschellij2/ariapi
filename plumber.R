@@ -139,6 +139,9 @@ function(req) {
     tmpfile = file
     file = paste0(tmpfile, ".pptx")
     file.copy(tmpfile, file)
+    print("pptx was copied")
+    print(file.exists(file))
+    print(file.info(file))
   }
   script = script$datapath
   
