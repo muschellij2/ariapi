@@ -15,7 +15,15 @@ library(rmarkdown)
 library(animation) #need for ffmpeg
 library(base64enc)
 library(pagedown)
+library(mime)
 Sys.setenv(GL_AUTH = "google_authorization.json")
+LD_LIBRARY_PATH = Sys.getenv("LD_LIBRARY_PATH")
+Sys.setenv(
+  LD_LIBRARY_PATH=
+    paste0(
+      "/usr/lib/libreoffice/program",
+      ":",
+      LD_LIBRARY_PATH))
 
 # way to get around "uploading" multiple files
 # SHOULD REWRITE FOR ALL OF THIS
@@ -48,6 +56,37 @@ convert_images = function(contents) {
   contents
 }
 
+unzipper = function(file) {
+  type = file$type
+  btype = tolower(basename(type))
+  if (is.data.frame(file)) {
+    if (nrow(file) == 1 && 
+        btype %in% "zip") {
+      message("Unzipping the files")
+      outfiles =  unzip(
+        file$datapath, 
+        exdir = tempdir(),
+        list = TRUE,
+        overwrite = TRUE)$Name
+      unzip(
+        file$datapath, 
+        exdir = tempdir(),
+        overwrite = TRUE)  
+      outfiles = file.path(
+        tempdir(),
+        outfiles)
+      print(outfiles)
+      file = data.frame(
+        name = basename(outfiles),
+        size = file.size(outfiles),
+        datapath = outfiles,
+        type = mime::guess_type(outfiles),
+        stringsAsFactors = FALSE)
+    }
+  }
+  return(file)
+}
+
 
 #' @examples 
 #' library(httr)
@@ -71,10 +110,11 @@ name_contents = function(req) {
   contents = contents[!names(contents) %in% arg_names]
   n_contents = seq_along(contents)
   
-
+  
   names(contents) = setdiff(arg_names, contents_names)[n_contents]
   contents = c(named_contents, contents)
   
+  contents$file = unzipper(contents$file)
   # way to get around "uploading" multiple files
   print("here are before content")
   print(contents)
@@ -112,7 +152,7 @@ guess_ari_func = function(contents, verbose = TRUE) {
     
   } else {
     type = file$type
-    btype = tolower(basename(type))
+    btype = tolower(basename(type))    
     if (all(btype %in% c("png", "jpg", "jpeg", "gif"))) {
       if (verbose) {
         print("png")
@@ -183,10 +223,36 @@ function(req) {
   }
   if (type_out %in% "pptx") {
     # need this for docxtractr
-    tmpfile = file
-    file = paste0(tmpfile, ".pptx")
-    file.copy(tmpfile, file)
-    print("pptx was copied")
+    if (!docxtractr:::is_pptx(file)) {
+      tmpfile = file
+      file = paste0(tmpfile, ".pptx")
+      file.copy(tmpfile, file)
+      print("pptx was copied")
+    }
+    # if (Sys.info()[["user"]] != "johnmuschelli") {
+    #   ofile = basename(file)
+    #   file.copy(file, ofile, overwrite = TRUE)
+    #   print(paste0("ofile is ", ofile))
+    #   file.exists(ofile)
+    #   on.exit({
+    #     file.remove(ofile)
+    #   })
+    #   pdf_file = sub("[.](pptx|docx|doc)$", ".pdf", file)
+    #   
+    #   docxtractr:::lo_assert()
+    #   tdir = tempdir()
+    #   
+    # 
+    #   print(Sys.which("soffice"))
+    #   cmd = "soffice --version"
+    #   print(system(cmd, intern = TRUE))
+    #   cmd = paste0("soffice --convert-to pdf --headless ", 
+    #                "--outdir ", dirname(file), " ", file)
+    #   system(cmd, intern = TRUE)
+    #   print(pdf_file)    
+    #   
+    #   # pdf_file = docxtractr::convert_to_pdf(ofile)
+    # }
     print(file.exists(file))
     print(file.info(file))
   }

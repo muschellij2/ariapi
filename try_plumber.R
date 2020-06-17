@@ -1,9 +1,10 @@
 library(httr)
 library(ariExtra)
-url = "http://127.0.0.1"
-port = 4710
-api_url = paste0(url, ":", port)
-# api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
+# url = "http://127.0.0.1"
+# port = 4710
+# api_url = paste0(url, ":", port)
+
+api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
 
 
 api_url = paste0(api_url, "/to_ari")
@@ -38,7 +39,8 @@ res = httr::POST(
   url = api_url, 
   body = body,
   auth_hdr)
-output = open_video(res)
+stop_for_status(res)
+# output = open_video(res)
 
 
 # Using PDF
@@ -55,19 +57,23 @@ res = httr::POST(
   url = api_url, 
   body = body, 
   auth_hdr)
-output = open_video(res)
+stop_for_status(res)
+# output = open_video(res)
 
 # Using PPTX - need libreoffice
 file = system.file("extdata", "example.pptx", package = "ariExtra")
+zipfile = tempfile(fileext = ".zip")
+zip(zipfile, files = file)
 
 body = list(
-  file = upload_file(file)
+  file = upload_file(zipfile)
 )
 res = httr::POST(
   url = api_url, 
   body = body, 
   auth_hdr)
-output = open_video(res)
+stop_for_status(res)
+# output = open_video(res)
 
 
 # does not work - can't do multiple files - maybe base64 encode?
@@ -89,4 +95,5 @@ res = httr::POST(
   url = api_url,
   body = body,
   auth_hdr)
+stop_for_status(res)
 # output = open_video(res)
