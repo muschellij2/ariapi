@@ -229,30 +229,6 @@ function(req) {
       file.copy(tmpfile, file)
       print("pptx was copied")
     }
-    # if (Sys.info()[["user"]] != "johnmuschelli") {
-    #   ofile = basename(file)
-    #   file.copy(file, ofile, overwrite = TRUE)
-    #   print(paste0("ofile is ", ofile))
-    #   file.exists(ofile)
-    #   on.exit({
-    #     file.remove(ofile)
-    #   })
-    #   pdf_file = sub("[.](pptx|docx|doc)$", ".pdf", file)
-    #   
-    #   docxtractr:::lo_assert()
-    #   tdir = tempdir()
-    #   
-    # 
-    #   print(Sys.which("soffice"))
-    #   cmd = "soffice --version"
-    #   print(system(cmd, intern = TRUE))
-    #   cmd = paste0("soffice --convert-to pdf --headless ", 
-    #                "--outdir ", dirname(file), " ", file)
-    #   system(cmd, intern = TRUE)
-    #   print(pdf_file)    
-    #   
-    #   # pdf_file = docxtractr::convert_to_pdf(ofile)
-    # }
     print(file.exists(file))
     print(file.info(file))
   }
