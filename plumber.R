@@ -17,13 +17,17 @@ library(base64enc)
 library(pagedown)
 library(mime)
 Sys.setenv(GL_AUTH = "google_authorization.json")
+
+# required for any the error
+# libreglo.so: cannot open shared object file: 
 LD_LIBRARY_PATH = Sys.getenv("LD_LIBRARY_PATH")
 Sys.setenv(
   LD_LIBRARY_PATH=
     paste0(
       "/usr/lib/libreoffice/program",
-      ":",
-      LD_LIBRARY_PATH))
+      if (nzchar(LD_LIBRARY_PATH)) paste0(":", LD_LIBRARY_PATH)
+    )
+)
 
 # way to get around "uploading" multiple files
 # SHOULD REWRITE FOR ALL OF THIS
