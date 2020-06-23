@@ -61,6 +61,9 @@ convert_images = function(contents) {
 }
 
 unzipper = function(file) {
+  if (is.character(file)) {
+    return(file)
+  }
   type = file$type
   btype = tolower(basename(type))
   if (is.data.frame(file)) {
@@ -118,6 +121,7 @@ name_contents = function(req) {
   names(contents) = setdiff(arg_names, contents_names)[n_contents]
   contents = c(named_contents, contents)
   
+  print("Running unzipper")
   contents$file = unzipper(contents$file)
   # way to get around "uploading" multiple files
   print("here are before content")
@@ -199,9 +203,11 @@ guess_ari_func = function(contents, verbose = TRUE) {
 
 #* @apiTitle Presentation Video Generation API
 
-#* Echo back the input
+#* Process Input into a Video
+#* @param service service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported
+#* @param voice The voice to use for synthesis, needs to be paired with service
 #* @param script file upload of script
-#* @param file file upload of PDF slides, PPTX file, or list of PNGs
+#* @param file ID of Google Slide deck, or file upload of PDF slides, PPTX file, or list of PNGs
 #* @post /to_ari
 function(req) {
   
@@ -255,6 +261,19 @@ function(req) {
     video = ari_processor(res, voice = voice, service = service),
     result = TRUE
   )
+}
+
+
+#* List Voices
+#* @param service service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported
+#* @get /list_voices
+function(service = NULL) {
+  
+  if (is.null(service)) {
+    service = "google"
+  }
+  text2speech::tts_auth(service = service)
+  return(text2speech::tts_voices(service = service))
 }
 
 

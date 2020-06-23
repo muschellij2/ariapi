@@ -4,96 +4,50 @@ library(ariExtra)
 # port = 4710
 # api_url = paste0(url, ":", port)
 
-api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
+api_url = "https://rsconnect.biostat.jhsph.edu/ario"
+# api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
+# api_url = paste0(api_url, "/to_ari")
 
+helper_functions = system.file("extdata", "plumber_functions.R", 
+                               package = "ariExtra")
 
-api_url = paste0(api_url, "/to_ari")
+source(helper_functions)
+####################################################
+# Testing
+####################################################
 
-api_key = Sys.getenv("CONNECT_API_KEY")
-auth_hdr = NULL
-if (nzchar(api_key)) {
-  auth_hdr = httr::add_headers(
-    Authorization = paste0("Key ", api_key))
-}
+# get voices
+res = mario_voices()
 
-open_video = function(res, open = TRUE) {
-  httr::stop_for_status(res)
-  bin_data = httr::content(res)
-  bin_data = bin_data$video[[1]]
-  bin_data = base64enc::base64decode(bin_data)
-  output = tempfile(fileext = ".mp4")
-  writeBin(bin_data, output)
-  if (open) {
-    system2("open", output)
-  }
-  output
-}
 # Google Slide ID
 id = "1Opt6lv7rRi7Kzb9bI0u3SWX1pSz1k7botaphTuFYgNs"
-
-body = list(
-  # file = upload_file
-  file = id
-)
-res = httr::POST(
-  url = api_url, 
-  body = body,
-  auth_hdr)
-stop_for_status(res)
-# output = open_video(res)
-
+res = mario(id)
+httr::stop_for_status(res)
 
 # Using PDF
 pdf_file = system.file("extdata", "example.pdf", package = "ariExtra")
 script = tempfile(fileext = ".txt")
-writeLines(c("hey", "ho"), script)
+paragraphs = c("hey", "ho")
+writeLines(paragraphs, script)
 
-body = list(
-  # file = upload_file
-  file = upload_file(pdf_file),
-  script = upload_file(script)
-)
-res = httr::POST(
-  url = api_url, 
-  body = body, 
-  auth_hdr)
-stop_for_status(res)
-# output = open_video(res)
+# Trying with script or paragraphs
+res = mario(pdf_file, script)
+httr::stop_for_status(res)
+res = mario(pdf_file, paragraphs)
+httr::stop_for_status(res)
 
 # Using PPTX - need libreoffice
 file = system.file("extdata", "example.pptx", package = "ariExtra")
-zipfile = tempfile(fileext = ".zip")
-zip(zipfile, files = file)
+res = mario(file)
 
-body = list(
-  file = upload_file(zipfile)
-)
-res = httr::POST(
-  url = api_url, 
-  body = body, 
-  auth_hdr)
-stop_for_status(res)
-# output = open_video(res)
-
-
-# does not work - can't do multiple files - maybe base64 encode?
+# Set of PNGs
 file = system.file("extdata", c("example_1.png", "example_2.png"),
                    package = "ariExtra")
-script = tempfile(fileext = ".txt")
-writeLines(c("hey", "ho"), script)
 
-body = list(
-  # file = upload_file
-  file = paste(
-    paste0(
-      xfun::file_ext(file), ": ", 
-      sapply(file, base64enc::base64encode)), 
-    collapse = "\n"),
-  script = upload_file(script)
-)
-res = httr::POST(
-  url = api_url,
-  body = body,
-  auth_hdr)
-stop_for_status(res)
-# output = open_video(res)
+res = mario(file, script)
+httr::stop_for_status(res)
+res = mario(file, paragraphs)
+httr::stop_for_status(res)
+
+
+
