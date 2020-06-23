@@ -1,12 +1,6 @@
 library(httr)
+# remotes::install_github("muschellij2/ariExtra")
 library(ariExtra)
-# url = "http://127.0.0.1"
-# port = 4710
-# api_url = paste0(url, ":", port)
-
-api_url = "https://rsconnect.biostat.jhsph.edu/ario"
-# api_url = "https://rsconnect.biostat.jhsph.edu/content/13"
-# api_url = paste0(api_url, "/to_ari")
 
 helper_functions = system.file("extdata", "plumber_functions.R", 
                                package = "ariExtra")
