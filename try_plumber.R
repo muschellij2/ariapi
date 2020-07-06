@@ -1,5 +1,5 @@
 library(httr)
-# remotes::install_github("muschellij2/ariExtra")
+# remotes::install_github("muschellij2/ariExtra", upgrade = FALSE)
 library(ariExtra)
 
 helper_functions = system.file("extdata", "plumber_functions.R", 

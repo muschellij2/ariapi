@@ -1,6 +1,6 @@
-Package: ario
+Package: mario
 Type: Package
-Title: Ari O
+Title: MARIO: Making Automated R Instructors Online
 Version: 1.0.0
 Authors@R: c(person(given = "John",
            family = "Muschelli",

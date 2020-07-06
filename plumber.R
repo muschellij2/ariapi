@@ -9,8 +9,8 @@
 
 library(plumber)
 library(ari)
-library(ariExtra)
 library(didactr)
+library(ariExtra)
 library(rmarkdown)
 library(animation) #need for ffmpeg
 library(base64enc)
@@ -110,7 +110,7 @@ name_contents = function(req) {
   # print(req)
   contents = mime::parse_multipart(req)
   arg_names = c("file", "script", "voice",
-                "service")
+                "service", "subtitles")
   contents_names = names(contents)
   print(arg_names)
   named_contents = contents[contents_names %in% arg_names ]
@@ -144,7 +144,10 @@ name_contents = function(req) {
   }
   contents$voice = voice
   contents$service = service
-  
+  contents$subtitles = ifelse(
+    is.null(contents$subtitles),
+    TRUE,
+    as.logical(contents$subtitles))
   
   return(contents)
 }
@@ -227,6 +230,10 @@ function(req) {
   print(script)
   voice = contents$voice
   service = contents$service
+  subtitles = contents$subtitles
+  if (is.null(subtitles)) {
+    subtitles = TRUE
+  }
   
   if (is.null(type_out) || !type_out %in% "gs") {
     file = file$datapath
@@ -251,14 +258,23 @@ function(req) {
   args$voice = voice
   args$open = FALSE
   args$verbose = 2
+  args$subtitles = subtitles
   print("args")
   print(args)
   res = do.call(func_to_run, args = args)
   # res = func_to_run(file, script = script, 
   #                   open = FALSE)
   ##* @serializer contentType list(type="video/mp4")
+  video = ari_processor(
+    res, 
+    voice = voice, service = service,
+    subtitles = subtitles)
+  subtitles = video$subtitles
+  video = video$video
   list(
-    video = ari_processor(res, voice = voice, service = service),
+    video = video,
+    subtitles = subtitles,
+    full_result = res,
     result = TRUE
   )
 }
@@ -277,17 +293,22 @@ function(service = NULL) {
 }
 
 
-ari_processor = function(res, voice, service) {
+ari_processor = function(res, voice, service, subtitles) {
   doc_args = list(verbose = TRUE)
   doc_args$voice = voice
   doc_args$service = service
+  doc_args$subtitles = subtitles
   format = do.call(ariExtra::ari_document, args = doc_args)
   
   out = rmarkdown::render(res$output_file, output_format = format)
   output = output_movie_file
+  sub_file = paste0(tools::file_path_sans_ext(output), ".srt")
   if (!file.exists(output)) {
     stop("Video was not generated") 
   }
   # readBin(output, "raw", n = file.info(output)$size)
-  base64enc::base64encode(output)
+  list(
+    subtitles = base64enc::base64encode(sub_file),
+    video = base64enc::base64encode(output)
+  )
 }
