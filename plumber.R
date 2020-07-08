@@ -110,7 +110,8 @@ name_contents = function(req) {
   # print(req)
   contents = mime::parse_multipart(req)
   arg_names = c("file", "script", "voice",
-                "service", "subtitles")
+                "service", "subtitles", "token", 
+                "trash", "target")
   contents_names = names(contents)
   print(arg_names)
   named_contents = contents[contents_names %in% arg_names ]
@@ -128,7 +129,7 @@ name_contents = function(req) {
   print(contents)
   
   contents = convert_images(contents)
-  print("here are the contents frm name_contents")  
+  print("here are the contents from name_contents")  
   
   voice = contents$voice
   service = contents$service
@@ -136,6 +137,8 @@ name_contents = function(req) {
     # service = "amazon"
     service = "google"
   }
+  
+  
   if (!text2speech::tts_auth(service = service)) {
     stop(paste0("Service ", service, " not authorized yet"))
   }
@@ -207,6 +210,7 @@ guess_ari_func = function(contents, verbose = TRUE) {
 #* @apiTitle Presentation Video Generation API
 
 #* Process Input into a Video
+#* @param target target language to translate to. If this is passed, then translation is done.
 #* @param service service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported
 #* @param voice The voice to use for synthesis, needs to be paired with service
 #* @param script file upload of script
@@ -231,8 +235,13 @@ function(req) {
   voice = contents$voice
   service = contents$service
   subtitles = contents$subtitles
-  if (is.null(subtitles)) {
-    subtitles = TRUE
+  
+  target = contents$target
+  translation = NULL
+  if (!is.null(target)) {
+    translation = run_translation(contents)
+    file = translation$id
+    type_out = "gs"
   }
   
   if (is.null(type_out) || !type_out %in% "gs") {
@@ -271,12 +280,14 @@ function(req) {
     subtitles = subtitles)
   subtitles = video$subtitles
   video = video$video
-  list(
+  L = list(
     video = video,
     subtitles = subtitles,
     full_result = res,
     result = TRUE
   )
+  L$translation = translation
+  L
 }
 
 
@@ -311,4 +322,79 @@ ari_processor = function(res, voice, service, subtitles) {
     subtitles = base64enc::base64encode(sub_file),
     video = base64enc::base64encode(output)
   )
+}
+
+#* @apiTitle Presentation Video Generation API
+
+#* Process Input into a Video
+#* @param service service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported
+#* @param voice The voice to use for synthesis, needs to be paired with service
+#* @param script file upload of script
+#* @param file ID of Google Slide deck
+#* @param trash should the slide deck be trashed?
+#* @param target target language to translate to.
+#* @post /translate_slide
+function(req) {
+  
+  contents = name_contents(req)
+  print("contents")
+  print(contents)
+  L = run_translation(contents)
+  
+  return(L)
+}
+
+run_translation = function(contents) {
+  
+  target = contents$target
+  print("target")
+  print(target)
+  if (is.null(target)) {
+    stop("target required for translate_slide")
+  }
+  
+  func_to_run = guess_ari_func(contents, verbose = TRUE)
+  type_out = attr(func_to_run, "type")
+  attr(func_to_run, "type") = NULL
+  print("func_to_run")  
+  if (!type_out %in% c("gs", "pptx")) {
+    stop(
+      paste0(
+        "Only Google Slide ID or PPTX allowed. Upload document ", 
+        "to Google Slides and use slide ID")
+    )
+  }
+  
+  token = contents$token
+  if (is.null(token)) {
+    stop("Token required for translate_slide")
+  }
+  if ("datapath" %in% names(token)) {
+    token = token$datapath
+  }
+  token = readRDS(token)
+  
+  file = contents$file
+  print("file")
+  print(file)
+  
+  didactr::check_didactr_auth(token = token)
+  gs_name = basename(tempfile())
+  if (type_out %in% "pptx") {
+    file = didactr::pptx_to_gs(path = file)$id
+  }
+  
+  result = didactr::copy_and_translate_slide(
+    id = file, 
+    gs_name = NULL,
+    verbose = TRUE,
+    trash_same_gs_name = FALSE,
+    target = target)
+  
+  contents$token = NULL
+  L = list(
+    id = result$id,
+    result = result,
+    file = file,
+    contents = contents)
 }
