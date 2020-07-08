@@ -326,13 +326,11 @@ ari_processor = function(res, voice, service, subtitles) {
 
 #* @apiTitle Presentation Video Generation API
 
-#* Process Input into a Video
-#* @param service service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported
-#* @param voice The voice to use for synthesis, needs to be paired with service
-#* @param script file upload of script
+#* Translates a Google Slide Deck Into Another Language
 #* @param file ID of Google Slide deck
 #* @param trash should the slide deck be trashed?
 #* @param target target language to translate to.
+#* @param token token file upload for Google Drive
 #* @post /translate_slide
 function(req) {
   
@@ -398,4 +396,44 @@ run_translation = function(contents) {
     result = result,
     file = file,
     contents = contents)
+}
+
+
+#* Base Handler that Gives a list of endpoints
+#* @get /endpoints
+function() {
+  list(
+    "translate_slide" = 
+      list(
+        description = "Translates a Google Slide Deck Into Another Language",
+        params = list(
+          token = "Google Drive token file, passed to httr::upload_file",
+          file = "Google Slide ID or httr::upload_file of PPTX",
+          script = 'file upload of script',
+          trash = 'should the slide deck be trashed after copying and translating?',
+          target = 'target language to translate to.'
+        )
+      ),
+    "to_ari" = 
+      list(
+        description ="Process a Number of Different Inputs into a Video", 
+        params = list(
+          target = 'target language to translate to. If this is passed, then translation is done.',
+          service = 'service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported',
+          voice = 'The voice to use for synthesis, needs to be paired with service',
+          script = 'file upload of script',
+          file = 'ID of Google Slide deck, or file upload of PDF slides, PPTX file, or list of PNGs',
+          token = "Google Drive token file, passed to httr::upload_file",
+          file = "Google Slide ID or httr::upload_file of PPTX"
+        )
+      ),
+    "list_voices" = list(
+      description =
+        "List the Available Voices for a Text-to-Speech Service",
+      params = list(
+        service = 'service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported'
+        
+      )      
+    )
+  )
 }
