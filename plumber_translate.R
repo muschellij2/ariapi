@@ -1,7 +1,8 @@
 library(httr)
 library(ariExtra)
 library(didactr)
-api_url = "http://127.0.0.1:1400"
+# api_url = "http://127.0.0.1:1400"
+api_url = "https://rsconnect.biostat.jhsph.edu/ario"
 path = "/translate_slide"
 url = paste0(api_url, path)
 
