@@ -388,6 +388,7 @@ run_translation = function(contents) {
     id = file, 
     gs_name = NULL,
     verbose = TRUE,
+    share = TRUE,
     trash_same_gs_name = FALSE,
     target = target)
   
