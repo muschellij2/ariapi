@@ -409,7 +409,6 @@ function() {
         params = list(
           token = "Google Drive token file, passed to httr::upload_file",
           file = "Google Slide ID or httr::upload_file of PPTX",
-          script = 'file upload of script',
           trash = 'should the slide deck be trashed after copying and translating?',
           target = 'target language to translate to.'
         )
@@ -421,7 +420,7 @@ function() {
           target = 'target language to translate to. If this is passed, then translation is done.',
           service = 'service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported',
           voice = 'The voice to use for synthesis, needs to be paired with service',
-          script = 'file upload of script',
+          script = 'file upload of script, in body passed to httr::upload_file',
           file = 'ID of Google Slide deck, or file upload of PDF slides, PPTX file, or list of PNGs',
           token = "Google Drive token file, passed to httr::upload_file",
           file = "Google Slide ID or httr::upload_file of PPTX"
