@@ -418,7 +418,10 @@ function() {
         description ="Process a Number of Different Inputs into a Video", 
         params = list(
           target = 'target language to translate to. If this is passed, then translation is done.',
-          service = 'service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported',
+          service = paste0(
+            'service to use for voice synthesis, including ', 
+            '"amazon", "google", or "microsoft".  Currently only ', 
+            '"google" supported'),
           voice = 'The voice to use for synthesis, needs to be paired with service',
           script = 'file upload of script, in body passed to httr::upload_file',
           file = 'ID of Google Slide deck, or file upload of PDF slides, PPTX file, or list of PNGs',
@@ -430,8 +433,10 @@ function() {
       description =
         "List the Available Voices for a Text-to-Speech Service",
       params = list(
-        service = 'service to use for voice synthesis, including "amazon", "google", or "microsoft".  Currently only "google" supported'
-        
+        service = paste0(
+          'service to use for voice synthesis, including ', 
+          '"amazon", "google", or "microsoft".  Currently only ', 
+          '"google" supported')
       )      
     )
   )
